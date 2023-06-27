@@ -47,6 +47,7 @@ let previousQuests: any[] = [];
 let i = 0;
 
 const pollForNewPlayers = async () => {
+  console.log("number of calls: ", i++);
   const quests = await getPlayers();
 
   quests.forEach((quest: any, index: number) => {
@@ -61,8 +62,7 @@ const pollForNewPlayers = async () => {
   });
 
   previousQuests = quests;
-  console.log("number of calls: ", i++);
 };
 
-// Call pollForNewPlayers every 10 seconds
-setInterval(pollForNewPlayers, 10000);
+// Call pollForNewPlayers every minute
+setInterval(pollForNewPlayers, 60000);
