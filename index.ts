@@ -44,10 +44,11 @@ const getPlayers = async () => {
         };
       } catch (error) {
         console.log("the quest was not found: ", error);
-        return quest;
+        return null;
       }
     })
   );
+  quests = quests.filter((quest: any) => quest !== null);
 
   return quests;
 };
@@ -65,21 +66,23 @@ const pollForNewPlayers = async () => {
   console.log("number of calls: ", i++);
   const quests = await getPlayers();
 
-  quests.forEach(async (quest: any, index: number) => {
-    if (previousQuests[index]) {
-      const newPlayers = quest.players.filter(
-        (player: any) => !previousQuests[index].players.includes(player)
+  for (const currentQuest of quests) {
+    const previousQuest = previousQuests.find(
+      (q) => q.questId === currentQuest.questId
+    );
+    if (previousQuest) {
+      const newPlayers = currentQuest.players.filter(
+        (player: any) => !previousQuest.players.includes(player)
       );
-      console.log(`new players of quest id ${quest.questId}: ${newPlayers}`);
-      newPlayers.forEach(async (player: any) => {
-        const message = `New player added to quest ${quest.questId}: ${player}`;
+
+      for (const player of newPlayers) {
+        const message = `New player added to quest ${currentQuest.questId}: ${player}`;
         console.log(message);
         await postMessageToSlack(message);
-      });
+      }
     }
-  });
-  previousQuests = quests;
+  }
+  previousQuests = JSON.parse(JSON.stringify(quests));
 };
 
-// Call pollForNewPlayers every minute
-setInterval(pollForNewPlayers, 15000);
+setInterval(pollForNewPlayers, 30000);
